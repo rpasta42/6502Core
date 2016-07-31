@@ -9,18 +9,26 @@ void print_regs(m6502* m);
 void print_flags(m6502* m);
 void print_machine(m6502* m);
 
+void step(m6502* m) {
+   m->tick();
+   m->pc++;
+}
+
 int main() {
    m6502* m = new m6502;
-   m->init(true);
+   m->init(false); //true);
 
    u8* mem = init_machine_mem(m);
 
-   mem[0] = 162;
+   mem[0] = 0xa9;
+   mem[1] = 0x00;
+   mem[2] = 0x20;
+   mem[3] = 0x10;
 
    print_machine(m);
-   m->tick();
+   step(m);
    print_machine(m);
-   m->tick();
+   step(m);
    print_machine(m);
 
    delete[] mem;
