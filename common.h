@@ -14,4 +14,20 @@ typedef uint32_t uint;
 
 using namespace std;
 
+inline u8* read_file(string path, int* f_length) {
+   ifstream f(path, fstream::binary);
+
+   f.seekg(0, ios::end);
+   int length = f.tellg();
+   f.seekg(0, ios::beg);
+
+   char* buff = new char[length];
+   f.read(buff, length);
+   f.close();
+
+   *f_length = length;
+
+   return (u8*)buff;
+}
+
 #endif //COMMON_H
