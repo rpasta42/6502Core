@@ -8,40 +8,63 @@ u8* init_machine_mem(m6502* m);
 void print_regs(m6502* m);
 void print_flags(m6502* m);
 void print_machine(m6502* m);
+void print_mem(u8* mem);
 
 void step(m6502* m) {
    m->tick();
-   m->pc++;
 }
+
 
 int main() {
    m6502* m = new m6502;
-   m->init(false); //true);
+   m->init(false);
 
    u8* mem = init_machine_mem(m);
 
-   mem[0] = 0xa9;
+   /*mem[0] = 0xa9;
    mem[1] = 0x00;
    mem[2] = 0x20;
-   mem[3] = 0x10;
+   mem[3] = 0x10;*/
+   //mem[0] = 0xea;
+   //mem[1] = 0xea;
+   mem[42] = 0xea;
+   mem[43] = 0xea;
+   mem[0xfffc] = 42;
 
+   /*print_machine(m);
+   m->tick();
    print_machine(m);
-   step(m);
-   print_machine(m);
-   step(m);
-   print_machine(m);
+   m->tick();
+   print_machine(m);*/
+
+   for (int i = 0; i < 15; i++) {
+      m->tick();
+      print_machine(m);
+      print_mem(mem);
+   }
 
    delete[] mem;
    delete m;
+}
+
+void print_mem(u8* mem) {
+   for (int i = 0; i < 100; i++)
+      cout << (int)mem[i];
+   cout << endl;
 }
 
 u8* init_machine_mem(m6502* m) {
    u8* mem = new u8[64*1000];
 
    auto rb = [mem](u16 addr) -> u8 {
+      cout << "rb (" << (int)mem[addr]
+           << ") at " << addr << endl;
+
       return mem[addr];
    };
    auto wb = [mem](u16 addr, u8 val) {
+      cout << "wb (" << (int)val << ") at "
+           << addr << endl;
       mem[addr] = val;
    };
    m->rb = rb;
