@@ -11,6 +11,7 @@ typedef int16_t s16;
 typedef uint32_t uint;
 
 #include <functional>
+#include <fstream>
 
 using namespace std;
 
