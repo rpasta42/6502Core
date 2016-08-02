@@ -46,17 +46,23 @@ int main() {
       print_machine(m);
       print_mem(mem);
    }*/
+   int i = 0;
+   for (; i < 100000; i++) {
+      if (m->reset && i > 7) break;
 
-   for (int i = 0; i < 100000; i++) {
-      //if (i > 10 && !m->execing) break;
-      cout << "kkkkkkkkkk:" << m->reset;
-      if (i > 100) break;
       m->tick();
       if (i % 50 == 0) {
          print_machine(m);
          print_mem(mem);
       }
    }
+
+   if (i >= 99998)
+      cout << "Number of CPU cycles reached the limit!";
+   if (m->reset)
+      cout << "reset!!";
+
+   cout << " Terminating execution at " << i << "==============\n";
 
    print_machine(m);
    print_mem(mem);
@@ -82,6 +88,7 @@ u8* read_file(string path, int* f_length) {
 }
 
 //TODO: check for errors in read_file and other places
+//0 = success, 1 = bad magic
 int load_nes(string path, u8* mem, u8 address) {
    int length = 0;
    u8 *prog_code, *p;
