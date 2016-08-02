@@ -141,7 +141,17 @@ int load_nes(string path, u8* mem, u8 address) {
       << (int)nes_header->prg_rom_size << endl
       << "chr rom size" << (int)nes_header->chr_rom_size
       << endl  << "title: " << title << endl;
-   //return 7;
+
+   u8 lower = nes_header->flags6.lower_nybble_mapper_num;
+   u8 upper = nes_header->flags7.upper_nybble_mapper_num;
+   cout
+      << "lower nybble mapper num: " << (uint)lower << endl
+      << "upper nybble mapper num: " << (uint)upper << endl;
+
+   u8 mapper_ver = (lower >> 4) & upper;
+
+   cout << "mapper num combined: " << (uint)mapper_ver;
+   return 7;
 
    return 0;
 }
