@@ -47,7 +47,10 @@ int main() {
       print_mem(mem);
    }*/
 
-   for (int i = 0; i < 100000 && m->execing; i++) {
+   for (int i = 0; i < 100000; i++) {
+      //if (i > 10 && !m->execing) break;
+      cout << "kkkkkkkkkk:" << m->reset;
+      if (i > 100) break;
       m->tick();
       if (i % 50 == 0) {
          print_machine(m);
