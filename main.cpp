@@ -6,6 +6,8 @@
 using namespace std;
 
 #define tabs "   "
+#define MEMORY_SIZE (64*1000)
+
 u8* init_machine_mem(m6502* m);
 void print_regs(m6502* m);
 void print_flags(m6502* m);
@@ -74,7 +76,7 @@ int load_nes(string path, u8* mem, u8 address) {
    if (p[0] != 'N' || p[1] != 'E' || p[2] != 'S')
       return 1;
 
-   memcpy(mem, prog_code, length);
+   memcpy(mem, prog_code + 3, length - 3);
    delete prog_code;
 
    return 0;
@@ -87,7 +89,9 @@ void print_mem(u8* mem, uint start, uint end) {
 }
 
 u8* init_machine_mem(m6502* m) {
-   u8* mem = new u8[64*1000];
+   u8* mem = new u8[MEMORY_SIZE];
+
+   memset(mem, 0, MEMORY_SIZE);
 
    auto rb = [mem](u16 addr) -> u8 {
       cout << "rb (" << (int)mem[addr]
