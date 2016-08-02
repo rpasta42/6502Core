@@ -12,7 +12,7 @@ u8* init_machine_mem(m6502* m);
 void print_regs(m6502* m);
 void print_flags(m6502* m);
 void print_machine(m6502* m);
-void print_mem(u8* mem, uint start = 0; uint end = 100);
+void print_mem(u8* mem, uint start = 0, uint end = 100);
 int load_nes(string path, u8* mem, u8 address = 42);
 
 int main() {
