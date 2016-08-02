@@ -1,4 +1,6 @@
 #include <iostream>
+#include <fstream>
+#include <cstring>
 #include "m6502.h"
 
 using namespace std;
@@ -8,12 +10,8 @@ u8* init_machine_mem(m6502* m);
 void print_regs(m6502* m);
 void print_flags(m6502* m);
 void print_machine(m6502* m);
-void print_mem(u8* mem);
-
-void step(m6502* m) {
-   m->tick();
-}
-
+void print_mem(u8* mem, uint start = 0; uint end = 100);
+int load_nes(string path, u8* mem, u8 address = 42);
 
 int main() {
    m6502* m = new m6502;
@@ -24,9 +22,9 @@ int main() {
    /*mem[0] = 0xa9;
    mem[1] = 0x00;
    mem[2] = 0x20;
-   mem[3] = 0x10;*/
-   //mem[0] = 0xea;
-   //mem[1] = 0xea;
+   mem[3] = 0x10;
+   mem[0] = 0xea;
+   mem[1] = 0xea;*/
    mem[42] = 0xea;
    mem[43] = 0xea;
    mem[0xfffc] = 42;
@@ -36,6 +34,10 @@ int main() {
    print_machine(m);
    m->tick();
    print_machine(m);*/
+
+   string prog_path = "../mario/SuperMarioBros.nes";
+   if (load_nes(prog_path, mem) != 0)
+      cout << "failed to load program";
 
    for (int i = 0; i < 15; i++) {
       m->tick();
@@ -47,8 +49,39 @@ int main() {
    delete m;
 }
 
-void print_mem(u8* mem) {
-   for (int i = 0; i < 100; i++)
+u8* read_file(string path, int* f_length) {
+   ifstream f(path, fstream::binary);
+
+   f.seekg(0, ios::end);
+   int length = f.tellg();
+   f.seekg(0, ios::beg);
+
+   char* buff = new char[length];
+   f.read(buff, length);
+   f.close();
+
+   *f_length = length;
+
+   return (u8*)buff;
+}
+
+//TODO: check for errors in read_file and other places
+int load_nes(string path, u8* mem, u8 address) {
+   int length = 0;
+   u8 *prog_code, *p;
+   prog_code = p = read_file(path, &length);
+
+   if (p[0] != 'N' || p[1] != 'E' || p[2] != 'S')
+      return 1;
+
+   memcpy(mem, prog_code, length);
+   delete prog_code;
+
+   return 0;
+}
+
+void print_mem(u8* mem, uint start, uint end) {
+   for (int i = start; i < end; i++)
       cout << (int)mem[i];
    cout << endl;
 }
