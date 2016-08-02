@@ -41,11 +41,22 @@ int main() {
    if (load_nes(prog_path, mem) != 0)
       cout << "failed to load program";
 
-   for (int i = 0; i < 15; i++) {
+   /*for (int i = 0; i < 15; i++) {
       m->tick();
       print_machine(m);
       print_mem(mem);
+   }*/
+
+   for (int i = 0; i < 100000 && m->execing; i++) {
+      m->tick();
+      if (i % 50 == 0) {
+         print_machine(m);
+         print_mem(mem);
+      }
    }
+
+   print_machine(m);
+   print_mem(mem);
 
    delete[] mem;
    delete m;
@@ -96,7 +107,6 @@ u8* init_machine_mem(m6502* m) {
    auto rb = [mem](u16 addr) -> u8 {
       cout << "rb (" << (int)mem[addr]
            << ") at " << addr << endl;
-
       return mem[addr];
    };
    auto wb = [mem](u16 addr, u8 val) {
