@@ -120,10 +120,19 @@ void print_regs(m6502* m) {
            tabs << "pc: " << m->pc << endl;
 }
 
+string or_flags_to_str(uint n, uint len) {
+   string s = "";
+   for (uint i = 0; i < len; i++) {
+      uint x = (n & (1 << i)) >> i;
+      s += to_string(x);
+   }
+   return s;
+}
+
 void print_flags(m6502* m) {
    cout << "flags:" << endl;
 
-   cout << tabs << "flags: " << m->flags <<
+   cout << tabs << "flags: " << or_flags_to_str(m->flags, 8) <<
            tabs << "reset: " << m->reset <<
            tabs << "sync: " << m->sync <<
            tabs << "irq: " << m->irq <<
