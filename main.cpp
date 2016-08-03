@@ -14,6 +14,8 @@ int main() {
    u8* mem = new u8[MEMORY_SIZE];
    memset(mem, 0, MEMORY_SIZE);
 
+   //0x8000
+
    string prog_path = "../mario/SuperMarioBros.nes";
    int load_stat = load_nes(prog_path, mem);
    if (load_stat != 0) {
@@ -24,7 +26,8 @@ int main() {
    init_machine_mem(m, mem);
 
    int i = 0;
-   for (; i < 1000000; i++) {
+   int max_cycles = 90000;//1000000;
+   for (; i <= max_cycles; i++) {
       if (m->reset && i > 7) break;
 
       m->tick();
@@ -34,7 +37,7 @@ int main() {
       }
    }
 
-   if (i >= 999998)
+   if (i >= max_cycles)
       cout << "Number of CPU cycles reached the limit!";
    if (m->reset)
       cout << "reset!!";
@@ -179,6 +182,16 @@ void check_mem(u16 addr, bool is_write) {
 u16 translate_addr(u16 addr) {
    //uncomment if rpg rom size == 2
    //if (addr >= 0xc000 && addr <= 0xffff) return addr - 0xc000 + 0x8000;
+   uint ram_size = 0x800 - 0x0;
+   if (addr >= 0x800 && addr <= (0x800 + ram_size)) {
+      return addr - ram_size;
+   }
+   if (addr >= 0x1000 && addr <= (0x1000 + ram_size)) {
+      return addr - 0x1000;
+   }
+   if (addr >= 0x1800 && addr <= (0x1800 + ram_size)) {
+      return addr - 0x1800;
+   }
    return addr;
 }
 
