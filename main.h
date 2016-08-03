@@ -17,15 +17,16 @@ int load_nes(string path, u8* mem, u8 address = 42);
 //http://wiki.nesdev.com/w/index.php/INES
 typedef struct nes_header_t {
    u8 magic[4]; //should be "NES", but in struct empty
-   u8 prg_rom_size;
-   u8 chr_rom_size;
+   u8 prg_rom_size; //12 bits used
+   u8 chr_rom_size; //12 bits used
    union {
       u8 flags6_b;
       struct {
-         bool arrange_type1 : 1;
+         bool mirroring : 1;
+         bool has_battery : 1;
          bool have_trainer : 1;
-         bool has_persist : 1;
-         u8 lower_nybble_mapper_num : 4;
+         bool four_screen : 1;
+         u8 nybble0_mapper_num : 4;
       } pack_ flags6;
    };
    union {
@@ -36,19 +37,45 @@ typedef struct nes_header_t {
          //8kb of hint screen data stored after CHR data
          bool play_choice10 : 1;
          bool vs_unisystem : 1;
-         u8 upper_nybble_mapper_num : 4;
+         u8 nybble1_mapper_num : 4;
       } pack_ flags7;
    };
-   u8 rpg_ram_size;
+   union {
+      u8 flags8_b;
+      struct {
+         u8 nybble2_mapper_num : 4;
+         u8 submapper_num : 4;
+      } pack_ flags8;
+   };
    union {
       u8 flags9_b;
-      struct {} pack_ flags9;
+      struct {
+         u8 high_prg_rom_size : 4;
+         u8 high_chr_rom_size : 4;
+      } pack_ flags9;
    };
    union {
       u8 flags10_b;
-      struct {} pack_ flags10;
+      struct {
+         u8 non_battery_prg_ram_size : 4;
+         u8 battery_prg_ram_size : 4;
+      } pack_ flags10;
    };
-   u8 zeros[5];
+   union {
+      u8 flags11_b;
+      struct {
+         u8 non_battery_chr_ram_size : 4;
+         u8 battery_chr_ram_size : 4;
+      } pack_ flags11;
+   };
+   union {
+      u8 flags12_b;
+      struct {
+         u8 pal_mode : 1;
+         u8 multi_region : 1;
+      } pack_ flags12;
+   };
+   u8 zeros[3];
 } pack_ nes_header_t;
 
 

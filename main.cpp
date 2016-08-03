@@ -23,28 +23,6 @@ int main() {
 
    init_machine_mem(m, mem);
 
-   /*mem[0] = 0xa9;
-   mem[1] = 0x00;
-   mem[2] = 0x20;
-   mem[3] = 0x10;
-   mem[0] = 0xea;
-   mem[1] = 0xea;*/
-   //mem[42] = 0xea;
-   //mem[43] = 0xea;
-   //mem[0xfffc] = 42;
-
-   /*print_machine(m);
-   m->tick();
-   print_machine(m);
-   m->tick();
-   print_machine(m);*/
-
-
-   /*for (int i = 0; i < 15; i++) {
-      m->tick();
-      print_machine(m);
-      print_mem(mem);
-   }*/
    int i = 0;
    for (; i < 1000000; i++) {
       if (m->reset && i > 7) break;
@@ -86,26 +64,12 @@ int load_nes(string path, u8* mem, u8 address) {
    if (p[n++] != 'N' || p[n++] != 'E' || p[n++] != 'S' || p[n++] != 0x1a)
       return 1;
 
-   /*u8 rpg_rom_size = p[n++]; //p[4]
-   u8 chr_rom_size = p[n++];
-   u8 flags6 = p[n++];
-   u8 flags7 = p[n++];
-   u8 rpg_ram_size = p[n++]; //p[8]
-   u8 flags9 = p[n++];
-   u8 flags10 = p[n++]; //p[10] */
-
    n = 10;
    while (n <= 15) {
       if (p[n++] != 0)
          return 2;
    }
 
-   /*nes_header_t *nes_header = new nes_header_t;
-   nes_header->rpg_rom_size = p[n++]; //p[4]
-   nes_header->chr_rom_size = p[n++];
-   nes_header->flags6_b = p[n++];
-   nes_header->flags7_b = p[n++];
-   nes_header->rpg_ram_size */
    p += 4;
    nes_header_t* nes_header = (nes_header_t*)prog_code;
    p += sizeof(nes_header_t);
@@ -115,15 +79,39 @@ int load_nes(string path, u8* mem, u8 address) {
       return 3;
    }
 
-   uint prg_rom_size = 16384 * nes_header->prg_rom_size;
+   u8 lower = nes_header->flags6.nybble0_mapper_num;
+   u8 upper = nes_header->flags7.nybble1_mapper_num;
+   cout
+      << "is NES 2.0: " << (uint)nes_header->flags7.is_nes2 << endl
+      << "lower nybble mapper num: " << (uint)lower << endl
+      << "upper nybble mapper num: " << (uint)upper << endl
+      << "flags6 combined: "
+      << or_flags_to_str(nes_header->flags6_b, 8) << endl
+      << "flags7 combined: "
+      << or_flags_to_str(nes_header->flags7_b, 8) << endl;
+
+   u16 mapper = upper | (lower << 4);
+   u8 submapper = 0;
+
+   u16 prg_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? nes_header->prg_rom_size | (nes_header.flags9.high_prg_rom_size << 8);
+   u16 chr_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? nes_header->chr_rom_size | (nes_header.flags9.high_chr_rom_size << 8);
+
+   if(nes_header->flags7.is_nes2 == 2)
+   {
+      mapper |= nes_header->flags8.nybble2_mapper_num << 8;
+      submapper = nes_header->flags8.submapper_num;
+   }
+
+   cout << "mapper num combined: " << (uint)mapper << endl;
+
+   uint prg_rom_size = 16384 * prg_rom_size_num;
    if (prg_rom_size == 0)
       prg_rom_size = 8192;
    u8* prg_rom = new u8[prg_rom_size];
    memcpy(prg_rom, p, prg_rom_size);
-   //memcpy(mem + 42, p, prg_rom_size);
-   cout << "got here" << endl;
+   //This function will be implemented eventually to handle mapper-specific ROM banking and mirroring.
+   //mapper_init(mapper, submapper, mem, p, prg_rom_size);
    memcpy(mem + 0x8000, p, prg_rom_size);
-   cout << "got here" << endl;
    p += prg_rom_size;
 
    uint chr_rom_size = 8192 * nes_header->chr_rom_size;
@@ -134,9 +122,6 @@ int load_nes(string path, u8* mem, u8 address) {
    if (nes_header->flags7.play_choice10)
       return 4; //TODO: read INST-ROM and PROM
 
-   /*memcpy(mem, prog_code + 3, length - 3);
-   delete prog_code;*/
-
    char* title_c_str = new char[128];
    memcpy(title_c_str, p + (length - 1 - 127), 127);
    title_c_str[127] = '\0';
@@ -146,9 +131,9 @@ int load_nes(string path, u8* mem, u8 address) {
    cout << "size of nes_header_t (should be 16): "
       << sizeof(nes_header_t) << endl;
 
-   cout << "rpg rom size:"
+   cout << "PRG rom size:"
       << (int)nes_header->prg_rom_size << endl
-      << "chr rom size" << (int)nes_header->chr_rom_size
+      << "CHR rom size" << (int)nes_header->chr_rom_size
       << endl  << "title: " << title << endl;
 
    u8 lower = nes_header->flags6.lower_nybble_mapper_num;
