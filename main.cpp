@@ -93,8 +93,8 @@ int load_nes(string path, u8* mem, u8 address) {
    u16 mapper = upper | (lower << 4);
    u8 submapper = 0;
 
-   u16 prg_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->prg_rom_size | (nes_header->flags9.high_prg_rom_size << 8)) : 0;
-   u16 chr_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->chr_rom_size | (nes_header->flags9.high_chr_rom_size << 8)) : 0;
+   u16 prg_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->prg_rom_size | (nes_header->flags9.high_prg_rom_size << 8)) : nes_header->prg_rom_size;
+   u16 chr_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->chr_rom_size | (nes_header->flags9.high_chr_rom_size << 8)) : nes_header->chr_rom_size;
 
    if(nes_header->flags7.is_nes2 == 2)
    {
