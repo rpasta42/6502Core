@@ -124,10 +124,9 @@ int load_nes(string path, u8* mem, u8 address) {
    memcpy(chr_rom, p, chr_rom_size);
    p += chr_rom_size;
 
-   if (nes_header->flags7.play_choice10) {
-      //TODO: read INST-ROM and PROM
-      return 4;
-   }
+   if (nes_header->flags7.play_choice10)
+      return 4; //TODO: read INST-ROM and PROM
+
    /*memcpy(mem, prog_code + 3, length - 3);
    delete prog_code;*/
 
@@ -145,12 +144,15 @@ int load_nes(string path, u8* mem, u8 address) {
    u8 lower = nes_header->flags6.lower_nybble_mapper_num;
    u8 upper = nes_header->flags7.upper_nybble_mapper_num;
    cout
+      << "is ness 2: " << (uint)nes_header->flags7.is_nes2 << endl
       << "lower nybble mapper num: " << (uint)lower << endl
       << "upper nybble mapper num: " << (uint)upper << endl;
 
-   u8 mapper_ver = (lower >> 4) & upper;
+   //u8 mapper_ver = (upper >> 4) | lower;
+   u8 mapper_ver = (lower >> 4) | upper;
+   //u8 mapper_ver = lower | upper;
 
-   cout << "mapper num combined: " << (uint)mapper_ver;
+   cout << "mapper num combined: " << (uint)mapper_ver << endl;
    return 7;
 
    return 0;

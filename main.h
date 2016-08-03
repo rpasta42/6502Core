@@ -18,21 +18,21 @@ typedef struct nes_header_t {
    union {
       u8 flags6_b;
       struct {
-         u8 lower_nybble_mapper_num : 4;
          bool arrange_type1 : 1;
          bool have_trainer : 1;
          bool has_persist : 1;
+         u8 lower_nybble_mapper_num : 4;
       } pack_ flags6;
    };
    union {
       u8 flags7_b;
       struct {
-         u8 upper_nybble_mapper_num : 4;
          //if is_nes2 == 2, then flags 8-15 are in NES 2.0 format
          u8 is_nes2 : 2;
          //8kb of hint screen data stored after CHR data
          bool play_choice10 : 1;
          bool vs_unisystem : 1;
+         u8 upper_nybble_mapper_num : 4;
       } pack_ flags7;
    };
    u8 rpg_ram_size;
