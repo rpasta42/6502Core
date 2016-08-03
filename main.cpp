@@ -162,12 +162,12 @@ int load_nes(string path, u8* mem, u8 address) {
       << "flags7 combined: "
       << or_flags_to_str(nes_header->flags7_b, 8) << endl;
 
-   u8 mapper_ver = upper | (lower << 4);
-   //u8 mapper_ver = (upper >> 4) | lower;
-   //u8 mapper_ver = (lower >> 4) | upper;
-   //u8 mapper_ver = lower | upper;
+   u8 mapper = upper | (lower << 4);
+   //u8 mapper = (upper >> 4) | lower;
+   //u8 mapper = (lower >> 4) | upper;
+   //u8 mapper = lower | upper;
 
-   cout << "mapper num combined: " << (uint)mapper_ver << endl;
+   cout << "mapper num combined: " << (uint)mapper << endl;
    //return 7;
 
    return 0;
@@ -184,15 +184,15 @@ void check_mem(u16 addr, bool is_write) {
    //and stepping through every one of them
 
    bool print_end = false;
-   if (addr > 0x6000 && addr < 0x7fff) {
+   if (addr >= 0x6000 && addr <= 0x7fff) {
       cout << "!!!!!!!!!!!!!!! PRG RAM RAM";
       print_end = true;
    }
-   if (addr > 0x8000 && addr < 0xbfff) {
+   if (addr >= 0x8000 && addr <= 0xbfff) {
       cout << "!!!!!!!!!!!!!! first 16KB ROM";
       print_end = true;
    }
-   if (addr > 0xc000 && addr < 0xffff) {
+   if (addr >= 0xc000 && addr <= 0xffff) {
       cout << "!!!!!!!!!! last 16kb of ROM" << endl;
    }
    if (print_end) {
@@ -201,18 +201,26 @@ void check_mem(u16 addr, bool is_write) {
    }
 }
 
+u16 translate_addr(u16 addr) {
+   if (addr >= 0xc000 && addr <= 0xffff) {
+      return addr - 0xc000 + 0x8000;
+   }
+   return addr;
+}
+
 void init_machine_mem(m6502* m, u8* mem) {
    auto rb = [mem](u16 addr) -> u8 {
       cout << "rb (" << (int)mem[addr]
            << ") at " << addr << endl;
       check_mem(addr, false);
-      return mem[addr];
+
+      return mem[translate_addr(addr)];
    };
    auto wb = [mem](u16 addr, u8 val) {
       cout << "wb (" << (int)val << ") at "
            << addr << endl;
       check_mem(addr, true);
-      mem[addr] = val;
+      mem[translate_addr(addr)] = val;
    };
    m->rb = rb;
    m->wb = wb;
