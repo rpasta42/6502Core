@@ -93,8 +93,8 @@ int load_nes(string path, u8* mem, u8 address) {
    u16 mapper = upper | (lower << 4);
    u8 submapper = 0;
 
-   u16 prg_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? nes_header->prg_rom_size | (nes_header.flags9.high_prg_rom_size << 8);
-   u16 chr_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? nes_header->chr_rom_size | (nes_header.flags9.high_chr_rom_size << 8);
+   u16 prg_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->prg_rom_size | (nes_header->flags9.high_prg_rom_size << 8)) : 0;
+   u16 chr_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->chr_rom_size | (nes_header->flags9.high_chr_rom_size << 8)) : 0;
 
    if(nes_header->flags7.is_nes2 == 2)
    {
@@ -136,25 +136,7 @@ int load_nes(string path, u8* mem, u8 address) {
       << "CHR rom size" << (int)nes_header->chr_rom_size
       << endl  << "title: " << title << endl;
 
-   u8 lower = nes_header->flags6.lower_nybble_mapper_num;
-   u8 upper = nes_header->flags7.upper_nybble_mapper_num;
-   cout
-      << "is nes 2: " << (uint)nes_header->flags7.is_nes2 << endl
-      << "lower nybble mapper num: " << (uint)lower << endl
-      << "upper nybble mapper num: " << (uint)upper << endl
-      << "flags6 combined: "
-      << or_flags_to_str(nes_header->flags6_b, 8) << endl
-      << "flags7 combined: "
-      << or_flags_to_str(nes_header->flags7_b, 8) << endl;
-
-   u8 mapper = upper | (lower << 4);
-   //u8 mapper = (upper >> 4) | lower;
-   //u8 mapper = (lower >> 4) | upper;
-   //u8 mapper = lower | upper;
-
-   cout << "mapper num combined: " << (uint)mapper << endl;
    //return 7;
-
    return 0;
 }
 
