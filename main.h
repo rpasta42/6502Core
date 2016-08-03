@@ -3,16 +3,20 @@
 #define tabs "   "
 #define MEMORY_SIZE (64*1000)
 #define EXTRACT_BIT(n, i) ((n & (1 << i)) >> i)
+//number of ticks to dump memory, registers and flags
+#define FREQ_DUMP 50
 
-u8* init_machine_mem(m6502* m);
+void init_machine_mem(m6502* m, u8* mem);
 void print_regs(m6502* m);
 void print_flags(m6502* m);
+string or_flags_to_str(uint n, uint len);
 void print_machine(m6502* m);
 void print_mem(u8* mem, uint start = 0, uint end = 100);
 int load_nes(string path, u8* mem, u8 address = 42);
 
 //http://wiki.nesdev.com/w/index.php/INES
 typedef struct nes_header_t {
+   u8 magic[4]; //should be "NES", but in struct empty
    u8 prg_rom_size;
    u8 chr_rom_size;
    union {
@@ -44,6 +48,7 @@ typedef struct nes_header_t {
       u8 flags10_b;
       struct {} pack_ flags10;
    };
+   u8 zeros[5];
 } pack_ nes_header_t;
 
 

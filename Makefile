@@ -10,7 +10,7 @@ default: test.run
 m6502.o: m6502.cpp
 	$(CPP) $(CFLAGS) -c m6502.cpp
 
-main.o: main.cpp
+main.o: main.cpp main.h
 	$(CPP) $(CFLAGS) -c main.cpp
 
 

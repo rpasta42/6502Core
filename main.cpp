@@ -11,7 +11,17 @@ int main() {
    m6502* m = new m6502;
    m->init(false);
 
-   u8* mem = init_machine_mem(m);
+   u8* mem = new u8[MEMORY_SIZE];
+   memset(mem, 0, MEMORY_SIZE);
+
+   string prog_path = "../mario/SuperMarioBros.nes";
+   int load_stat = load_nes(prog_path, mem);
+   if (load_stat != 0) {
+      cout << "failed to load program: " << load_stat << endl;
+      exit(1);
+   }
+
+   init_machine_mem(m, mem);
 
    /*mem[0] = 0xa9;
    mem[1] = 0x00;
@@ -29,12 +39,6 @@ int main() {
    m->tick();
    print_machine(m);*/
 
-   string prog_path = "../mario/SuperMarioBros.nes";
-   int load_stat = load_nes(prog_path, mem);
-   if (load_stat != 0) {
-      cout << "failed to load program: " << load_stat << endl;
-      exit(1);
-   }
 
    /*for (int i = 0; i < 15; i++) {
       m->tick();
@@ -46,7 +50,7 @@ int main() {
       if (m->reset && i > 7) break;
 
       m->tick();
-      if (i % 50 == 0) {
+      if (i % FREQ_DUMP == 0) {
          print_machine(m);
          print_mem(mem);
       }
@@ -103,7 +107,7 @@ int load_nes(string path, u8* mem, u8 address) {
    nes_header->flags7_b = p[n++];
    nes_header->rpg_ram_size */
    p += 4;
-   nes_header_t* nes_header = (nes_header_t*)p;
+   nes_header_t* nes_header = (nes_header_t*)prog_code;
    p += sizeof(nes_header_t);
 
    if (nes_header->flags6.have_trainer) {
@@ -116,7 +120,10 @@ int load_nes(string path, u8* mem, u8 address) {
       prg_rom_size = 8192;
    u8* prg_rom = new u8[prg_rom_size];
    memcpy(prg_rom, p, prg_rom_size);
-   memcpy(mem + 42, p, prg_rom_size);
+   //memcpy(mem + 42, p, prg_rom_size);
+   cout << "got here" << endl;
+   memcpy(mem + 0x8000, p, prg_rom_size);
+   cout << "got here" << endl;
    p += prg_rom_size;
 
    uint chr_rom_size = 8192 * nes_header->chr_rom_size;
@@ -136,6 +143,9 @@ int load_nes(string path, u8* mem, u8 address) {
 
    string title = string(title_c_str);
 
+   cout << "size of nes_header_t (should be 16): "
+      << sizeof(nes_header_t) << endl;
+
    cout << "rpg rom size:"
       << (int)nes_header->prg_rom_size << endl
       << "chr rom size" << (int)nes_header->chr_rom_size
@@ -146,10 +156,15 @@ int load_nes(string path, u8* mem, u8 address) {
    cout
       << "is ness 2: " << (uint)nes_header->flags7.is_nes2 << endl
       << "lower nybble mapper num: " << (uint)lower << endl
-      << "upper nybble mapper num: " << (uint)upper << endl;
+      << "upper nybble mapper num: " << (uint)upper << endl
+      << "flags6 combined: "
+      << or_flags_to_str(nes_header->flags6_b, 8) << endl
+      << "flags7 combined: "
+      << or_flags_to_str(nes_header->flags7_b, 8) << endl;
 
+   u8 mapper_ver = upper | (lower << 4);
    //u8 mapper_ver = (upper >> 4) | lower;
-   u8 mapper_ver = (lower >> 4) | upper;
+   //u8 mapper_ver = (lower >> 4) | upper;
    //u8 mapper_ver = lower | upper;
 
    cout << "mapper num combined: " << (uint)mapper_ver << endl;
@@ -164,11 +179,23 @@ void print_mem(u8* mem, uint start, uint end) {
    cout << endl;
 }
 
-u8* init_machine_mem(m6502* m) {
-   u8* mem = new u8[MEMORY_SIZE];
+void check_mem(u16 addr, bool is_write) {
+   if (addr > 0x6000 && addr < 0x7fff) {
+      cout << "!!!!!!!!!!!!!!! PRG RAM RAM";
+      int i; cin >> i;
+   }
+   if (addr > 0x8000 && addr < 0xbfff) {
+      cout << "!!!!!!!!!!!!!! first 16KB ROM";
+      int i; cin >> i;
+   }
 
-   memset(mem, 0, MEMORY_SIZE);
+   if (addr > 0xc000 && addr < 0xffff) {
+      cout << "!!!!!!!!!! last 16kb of ROM";
+      int i; cin >> i;
+   }
+}
 
+void init_machine_mem(m6502* m, u8* mem) {
    auto rb = [mem](u16 addr) -> u8 {
       cout << "rb (" << (int)mem[addr]
            << ") at " << addr << endl;
@@ -181,8 +208,6 @@ u8* init_machine_mem(m6502* m) {
    };
    m->rb = rb;
    m->wb = wb;
-
-   return mem;
 }
 
 void print_regs(m6502* m) {
