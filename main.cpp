@@ -110,7 +110,7 @@ int load_nes(string path, u8* mem, u8 address) {
    u8* prg_rom = new u8[prg_rom_size];
    memcpy(prg_rom, p, prg_rom_size);
    //This function will be implemented eventually to handle mapper-specific ROM banking and mirroring.
-   //mapper_init(mapper, mem, p, prg_rom_size);
+   //mapper_init(mapper, submapper, mem, p, prg_rom_size);
    memcpy(mem + 0x8000, p, prg_rom_size);
    p += prg_rom_size;
 
