@@ -193,8 +193,7 @@ void check_mem(u16 addr, bool is_write) {
       print_end = true;
    }
    if (addr > 0xc000 && addr < 0xffff) {
-      cout << "!!!!!!!!!! last 16kb of ROM";
-      print_end = true;
+      cout << "!!!!!!!!!! last 16kb of ROM" << endl;
    }
    if (print_end) {
       cout << endl;
