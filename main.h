@@ -1,7 +1,7 @@
 #define pack_ __attribute__((packed))
 
 #define tabs "   "
-#define MEMORY_SIZE (64*1000)
+#define MEMORY_SIZE 0x10000 //(64*1000)
 #define EXTRACT_BIT(n, i) ((n & (1 << i)) >> i)
 //number of ticks to dump memory, registers and flags
 #define FREQ_DUMP 50

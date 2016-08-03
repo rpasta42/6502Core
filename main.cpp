@@ -29,9 +29,9 @@ int main() {
    mem[3] = 0x10;
    mem[0] = 0xea;
    mem[1] = 0xea;*/
-   mem[42] = 0xea;
-   mem[43] = 0xea;
-   mem[0xfffc] = 42;
+   //mem[42] = 0xea;
+   //mem[43] = 0xea;
+   //mem[0xfffc] = 42;
 
    /*print_machine(m);
    m->tick();
@@ -168,7 +168,7 @@ int load_nes(string path, u8* mem, u8 address) {
    //u8 mapper_ver = lower | upper;
 
    cout << "mapper num combined: " << (uint)mapper_ver << endl;
-   return 7;
+   //return 7;
 
    return 0;
 }
