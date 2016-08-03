@@ -154,7 +154,7 @@ int load_nes(string path, u8* mem, u8 address) {
    u8 lower = nes_header->flags6.lower_nybble_mapper_num;
    u8 upper = nes_header->flags7.upper_nybble_mapper_num;
    cout
-      << "is ness 2: " << (uint)nes_header->flags7.is_nes2 << endl
+      << "is nes 2: " << (uint)nes_header->flags7.is_nes2 << endl
       << "lower nybble mapper num: " << (uint)lower << endl
       << "upper nybble mapper num: " << (uint)upper << endl
       << "flags6 combined: "
@@ -199,6 +199,10 @@ void check_mem(u16 addr, bool is_write) {
       printf("!!!!!!!!! gpu register\n");
       print_end = true;
    }
+   if (addr >= 0x4000 && addr <= 0x400f) {
+      printf("!!!!! sound\n");
+      print_end = true;
+   }
    if (print_end) {
       cout << endl;
       string i; cin >> i;
@@ -214,13 +218,13 @@ u16 translate_addr(u16 addr) {
 void init_machine_mem(m6502* m, u8* mem) {
    auto rb = [mem](u16 addr) -> u8 {
       cout << "rb (" << (int)mem[addr]
-           << ") at " << addr << endl;
+           << ") at " << std::hex << addr << endl;
       check_mem(addr, false);
       return mem[translate_addr(addr)];
    };
    auto wb = [mem](u16 addr, u8 val) {
       cout << "wb (" << (int)val << ") at "
-           << addr << endl;
+           << std::hex << addr << endl;
       check_mem(addr, true);
       mem[translate_addr(addr)] = val;
    };
