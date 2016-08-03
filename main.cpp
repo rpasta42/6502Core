@@ -195,6 +195,10 @@ void check_mem(u16 addr, bool is_write) {
    if (addr >= 0xc000 && addr <= 0xffff) {
       cout << "!!!!!!!!!! last 16kb of ROM" << endl;
    }
+   if (addr >= 0x2000 && addr <= 0x3fff) {
+      printf("!!!!!!!!! gpu register\n");
+      print_end = true;
+   }
    if (print_end) {
       cout << endl;
       string i; cin >> i;
@@ -202,9 +206,8 @@ void check_mem(u16 addr, bool is_write) {
 }
 
 u16 translate_addr(u16 addr) {
-   if (addr >= 0xc000 && addr <= 0xffff) {
-      return addr - 0xc000 + 0x8000;
-   }
+   //uncomment if rpg rom size == 2
+   //if (addr >= 0xc000 && addr <= 0xffff) return addr - 0xc000 + 0x8000;
    return addr;
 }
 
@@ -213,7 +216,6 @@ void init_machine_mem(m6502* m, u8* mem) {
       cout << "rb (" << (int)mem[addr]
            << ") at " << addr << endl;
       check_mem(addr, false);
-
       return mem[translate_addr(addr)];
    };
    auto wb = [mem](u16 addr, u8 val) {
