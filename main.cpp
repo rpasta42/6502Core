@@ -46,7 +46,7 @@ int main() {
       print_mem(mem);
    }*/
    int i = 0;
-   for (; i < 100000; i++) {
+   for (; i < 1000000; i++) {
       if (m->reset && i > 7) break;
 
       m->tick();
@@ -56,7 +56,7 @@ int main() {
       }
    }
 
-   if (i >= 99998)
+   if (i >= 999998)
       cout << "Number of CPU cycles reached the limit!";
    if (m->reset)
       cout << "reset!!";
@@ -180,18 +180,25 @@ void print_mem(u8* mem, uint start, uint end) {
 }
 
 void check_mem(u16 addr, bool is_write) {
+   //used for looking at how the rpg ram and rom being used
+   //and stepping through every one of them
+
+   bool print_end = false;
    if (addr > 0x6000 && addr < 0x7fff) {
       cout << "!!!!!!!!!!!!!!! PRG RAM RAM";
-      int i; cin >> i;
+      print_end = true;
    }
    if (addr > 0x8000 && addr < 0xbfff) {
       cout << "!!!!!!!!!!!!!! first 16KB ROM";
-      int i; cin >> i;
+      print_end = true;
    }
-
    if (addr > 0xc000 && addr < 0xffff) {
       cout << "!!!!!!!!!! last 16kb of ROM";
-      int i; cin >> i;
+      print_end = true;
+   }
+   if (print_end) {
+      cout << endl;
+      string i; cin >> i;
    }
 }
 
@@ -199,11 +206,13 @@ void init_machine_mem(m6502* m, u8* mem) {
    auto rb = [mem](u16 addr) -> u8 {
       cout << "rb (" << (int)mem[addr]
            << ") at " << addr << endl;
+      check_mem(addr, false);
       return mem[addr];
    };
    auto wb = [mem](u16 addr, u8 val) {
       cout << "wb (" << (int)val << ") at "
            << addr << endl;
+      check_mem(addr, true);
       mem[addr] = val;
    };
    m->rb = rb;
