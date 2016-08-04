@@ -73,13 +73,12 @@ int load_nes(string path, u8* mem, u8 address) {
          return 2;
    }
 
-   p += 4;
-
+   n = 0;
    nes_header_t* nes_header = (nes_header_t*)prog_code;
-   p += sizeof(nes_header_t);
+   n += sizeof(nes_header_t);
 
    if (nes_header->flags6.have_trainer) {
-      p += 512;
+      n += 512;
       return 3;
    }
 
@@ -99,14 +98,10 @@ int load_nes(string path, u8* mem, u8 address) {
 
    u16 prg_rom_size_num = nes_header->prg_rom_size;
    u16 chr_rom_size_num = nes_header->chr_rom_size;
-
    if (nes_header->flags7.is_nes2 == 2) {
       prg_rom_size_num |= (nes_header->flags9.high_prg_rom_size << 8);
       chr_rom_size_num |=  (nes_header->flags9.high_chr_rom_size << 8);
    }
-
-   /*u16 prg_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->prg_rom_size | (nes_header->flags9.high_prg_rom_size << 8)) : nes_header->prg_rom_size;
-   u16 chr_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->chr_rom_size | (nes_header->flags9.high_chr_rom_size << 8)) : nes_header->chr_rom_size;*/
 
    if(nes_header->flags7.is_nes2 == 2)
    {
@@ -120,22 +115,23 @@ int load_nes(string path, u8* mem, u8 address) {
    if (prg_rom_size == 0)
       prg_rom_size = 8192;
    u8* prg_rom = new u8[prg_rom_size];
-   memcpy(prg_rom, p, prg_rom_size);
+   memcpy(prg_rom, prog_code + n, prg_rom_size);
    //This function will be implemented eventually to handle mapper-specific ROM banking and mirroring.
    //mapper_init(mapper, submapper, mem, p, prg_rom_size);
-   memcpy(mem + 0x8000, p, prg_rom_size);
-   p += prg_rom_size;
+   memcpy(mem + 0x8000, prog_code + n, prg_rom_size);
+   //p += prg_rom_size;
+   n += prg_rom_size;
 
    uint chr_rom_size = 8192 * nes_header->chr_rom_size;
    u8* chr_rom = new u8[chr_rom_size];
-   memcpy(chr_rom, p, chr_rom_size);
-   p += chr_rom_size;
+   memcpy(chr_rom, prog_code + n, chr_rom_size);
+   n += chr_rom_size;
 
    if (nes_header->flags7.play_choice10)
       return 4; //TODO: read INST-ROM and PROM
 
    char* title_c_str = new char[128];
-   memcpy(title_c_str, p + (length - 1 - 127), 127);
+   memcpy(title_c_str, prog_code + (length - 1 - 127), 127);
    title_c_str[127] = '\0';
 
    string title = string(title_c_str);
