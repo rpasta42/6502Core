@@ -1395,7 +1395,7 @@ void m6502::tick()
                         a += 0x60;
                     }
                 }
-                
+
                 if(res1 & 0x80) flags |= 0x80;
                 else flags &= 0x7f;
                 if(res1 == 0) flags |= 0x02;
@@ -3683,6 +3683,13 @@ void m6502::tick()
             }
             break;
         }
+        /*case 0x19: {
+          string s;
+          cout << "got opcode 19";
+          cin >> s;
+
+          break;
+        }*/
         default:
         {
             printf("Unimplemented opcode %02x!\n",op);
