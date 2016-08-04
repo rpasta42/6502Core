@@ -2,10 +2,9 @@
 //the main.cpp and main.h are under GPLv2+ until we
 //decide what to do with it
 
-#include <iostream>
-#include <cstring>
 #include "m6502.h"
 #include "main.h"
+#include "ppu.h"
 
 int main() {
    m6502* m = new m6502;
@@ -26,8 +25,7 @@ int main() {
    init_machine_mem(m, mem);
 
    int i = 0;
-   int max_cycles = 100; //90000;//1000000;
-   for (; i <= max_cycles; i++) {
+   for (; i <= MAX_CYCLES; i++) {
       if (m->reset && i > 7) break;
 
       m->tick();
@@ -37,7 +35,7 @@ int main() {
       }
    }
 
-   if (i >= max_cycles)
+   if (i >= MAX_CYCLES)
       cout << "Number of CPU cycles reached the limit!";
    if (m->reset)
       cout << "reset!!";
@@ -139,10 +137,10 @@ int load_nes(string path, u8* mem, u8 address) {
    cout << "size of nes_header_t (should be 16): "
       << sizeof(nes_header_t) << endl;
 
-   cout << "PRG rom size:"
+   cout << "PRG rom size: "
       << (int)nes_header->prg_rom_size << endl
-      << "CHR rom size" << (int)nes_header->chr_rom_size
-      << endl  << "title: " << title << endl;
+      << "CHR rom size: " << (int)nes_header->chr_rom_size << endl;
+      //<< "title: " << endl << title << endl;
 
    //return 7;
    return 0;
@@ -154,37 +152,54 @@ void print_mem(u8* mem, uint start, uint end) {
    cout << endl;
 }
 
-void check_mem(u16 addr, bool is_write) {
+void check_mem(u16 addr, u8 val, bool is_write) {
    //used for looking at how the rpg ram and rom being used
    //and stepping through every one of them
 
+   const char* action = is_write ? "write" : "read";
    bool print_end = false;
    if (addr >= 0x6000 && addr <= 0x7fff) {
-      cout << "!!!!!!!!!!!!!!! PRG RAM RAM";
-      print_end = true;
+      if (PRINT_PRG_RAM_ACCESS)
+         cout << "!!!!!!!!!!!!!!! PRG RAM RAM";
+      if (PAUSE_PRG_RAM_ACCESS)
+         print_end = true;
    }
    if (addr >= 0x8000 && addr <= 0xbfff) {
-      cout << "!!!!!!!!!!!!!! first 16KB ROM";
-      print_end = true;
+      if (PRINT_ROM_ACCESS_START)
+         cout << "!!!!!!!!!!!!!! first 16KB ROM";
+      if (PAUSE_ROM_ACCESS_START)
+         print_end = true;
    }
    if (addr >= 0xc000 && addr <= 0xffff) {
-      cout << "!!!!!!!!!! last 16kb of ROM" << endl;
+      if (PRINT_ROM_ACCESS_END)
+         cout << "!!!!!!!!!! last 16kb of ROM" << endl;
+      if (PAUSE_ROM_ACCESS_END)
+         print_end = true;
    }
    if (addr >= 0x2000 && addr <= 0x3fff) {
-      printf("!!!!!!!!! gpu register\n");
-      print_end = true;
+      if (PRINT_PPU_RAM_ACCESS) {
+         printf("!!!!!!!!! gpu register %s: (addr: %i) (addr hex: %x) (val: %i)",
+                action, addr, addr, val);
+      }
+      if (PAUSE_PPU_RAM_ACCESS)
+         print_end = true;
    }
    if (addr >= 0x4000 && addr <= 0x400f) {
-      printf("!!!!! sound\n");
-      print_end = true;
+      if (PRINT_SOUND_ACCESS)
+         printf("!!!!! sound\n");
+      if (PAUSE_SOUND_ACCESS)
+         print_end = true;
    }
    if (print_end) {
-      cout << endl;
       string i; cin >> i;
    }
+   cout << endl;
+
 }
 
 u16 translate_addr(u16 addr) {
+   //return addr;
+
    //uncomment if rpg rom size == 2
    //if (addr >= 0xc000 && addr <= 0xffff) return addr - 0xc000 + 0x8000;
    uint ram_size = 0x800 - 0x0;
@@ -201,17 +216,25 @@ u16 translate_addr(u16 addr) {
 }
 
 void init_machine_mem(m6502* m, u8* mem) {
-   auto rb = [mem](u16 addr) -> u8 {
+   ppu_t* ppu = new ppu_t;
+
+   auto rb = [mem, ppu](u16 addr) -> u8 {
       cout << "rb (" << (int)mem[addr]
            << ") at " << std::hex << addr << endl;
-      check_mem(addr, false);
+      check_mem(addr, mem[addr], false);
+
+      if (addr >= 0x2000 && addr <= 0x3fff)
+         return ppu->rb(addr);
       return mem[translate_addr(addr)];
    };
-   auto wb = [mem](u16 addr, u8 val) {
+   auto wb = [mem, ppu](u16 addr, u8 val) {
       cout << "wb (" << (int)val << ") at "
            << std::hex << addr << endl;
-      check_mem(addr, true);
-      mem[translate_addr(addr)] = val;
+      check_mem(addr, val, true);
+      if (addr >= 0x2000 && addr <= 0x3fff)
+         ppu->wb(addr, val);
+      else
+         mem[translate_addr(addr)] = val;
    };
    m->rb = rb;
    m->wb = wb;

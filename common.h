@@ -3,6 +3,8 @@
 
 #include <cstdio>
 #include <cstdint>
+#include <iostream>
+#include <cstring>
 
 typedef uint8_t u8;
 typedef int8_t s8;

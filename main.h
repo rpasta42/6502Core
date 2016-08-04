@@ -1,10 +1,36 @@
+#ifndef MAIN_H_INCLUDE
+#define MAIN_H_INCLUDE
+
+#include "common.h"
+
 #define pack_ __attribute__((packed))
 
 #define tabs "   "
 #define MEMORY_SIZE 0x10000 //(64*1000)
+#define MAX_CYCLES 1000000//10000//1000//100 //90000 //1000000
 #define EXTRACT_BIT(n, i) ((n & (1 << i)) >> i)
 //number of ticks to dump memory, registers and flags
 #define FREQ_DUMP 50
+
+
+//CHECK_MEM STUFF
+//This stuff is used in check_mem for debugging
+//print when accessing first 16KB of ROM
+#define PRINT_ROM_ACCESS_START 1
+#define PAUSE_ROM_ACCESS_START 0
+
+#define PRINT_ROM_ACCESS_END 1
+#define PAUSE_ROM_ACCESS_END 0//1
+
+#define PRINT_PRG_RAM_ACCESS 1
+#define PAUSE_PRG_RAM_ACCESS 0
+
+#define PRINT_PPU_RAM_ACCESS 0//1
+#define PAUSE_PPU_RAM_ACCESS 0//1
+
+#define PRINT_SOUND_ACCESS 1
+#define PAUSE_SOUND_ACCESS 1
+//END CHECK_MEM STUFF
 
 void init_machine_mem(m6502* m, u8* mem);
 void print_regs(m6502* m);
@@ -79,3 +105,4 @@ typedef struct nes_header_t {
 } pack_ nes_header_t;
 
 
+#endif //MAIN_H_INCLUDE
