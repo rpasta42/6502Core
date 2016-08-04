@@ -26,7 +26,7 @@ int main() {
    init_machine_mem(m, mem);
 
    int i = 0;
-   int max_cycles = 90000;//1000000;
+   int max_cycles = 100; //90000;//1000000;
    for (; i <= max_cycles; i++) {
       if (m->reset && i > 7) break;
 
@@ -42,7 +42,8 @@ int main() {
    if (m->reset)
       cout << "reset!!";
 
-   cout << " Terminating execution at " << i << "==============\n";
+   cout << " Terminating execution at " << i
+        << "==============\n";
 
    print_machine(m);
    print_mem(mem);
@@ -50,7 +51,6 @@ int main() {
    delete[] mem;
    delete m;
 }
-
 
 //TODO: check for errors in read_file and other places
 //TODO: add print_nes_header() function
@@ -74,6 +74,7 @@ int load_nes(string path, u8* mem, u8 address) {
    }
 
    p += 4;
+
    nes_header_t* nes_header = (nes_header_t*)prog_code;
    p += sizeof(nes_header_t);
 
@@ -96,8 +97,16 @@ int load_nes(string path, u8* mem, u8 address) {
    u16 mapper = upper | (lower << 4);
    u8 submapper = 0;
 
-   u16 prg_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->prg_rom_size | (nes_header->flags9.high_prg_rom_size << 8)) : nes_header->prg_rom_size;
-   u16 chr_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->chr_rom_size | (nes_header->flags9.high_chr_rom_size << 8)) : nes_header->chr_rom_size;
+   u16 prg_rom_size_num = nes_header->prg_rom_size;
+   u16 chr_rom_size_num = nes_header->chr_rom_size;
+
+   if (nes_header->flags7.is_nes2 == 2) {
+      prg_rom_size_num |= (nes_header->flags9.high_prg_rom_size << 8);
+      chr_rom_size_num |=  (nes_header->flags9.high_chr_rom_size << 8);
+   }
+
+   /*u16 prg_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->prg_rom_size | (nes_header->flags9.high_prg_rom_size << 8)) : nes_header->prg_rom_size;
+   u16 chr_rom_size_num = (nes_header->flags7.is_nes2 == 2) ? (nes_header->chr_rom_size | (nes_header->flags9.high_chr_rom_size << 8)) : nes_header->chr_rom_size;*/
 
    if(nes_header->flags7.is_nes2 == 2)
    {
