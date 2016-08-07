@@ -6,7 +6,7 @@
 #include "main.h"
 #include "ppu.h"
 
-int main() {
+int main(int ac, char** av) {
    m6502* m = new m6502;
    m->init(false);
 
@@ -15,7 +15,9 @@ int main() {
 
    //0x8000
 
-   string prog_path = "../mario/SuperMarioBros.nes";
+   if(ac<2) return -1;
+
+   string prog_path = av[1];
    int load_stat = load_nes(prog_path, mem);
    if (load_stat != 0) {
       cout << "failed to load program: " << load_stat << endl;

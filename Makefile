@@ -1,24 +1,15 @@
 
 CPP=g++
 CFLAGS=-O3 -g -std=c++11
+OBJ= m6502.o main.o ppu.o
 
-run: test.run
-	./test.run
+all: test
 
-default: test.run
+test: $(OBJ)
+	$(CPP) $(CFLAGS) $(OBJ) -o test
 
-ppu.o: ppu.cpp ppu.h
-	$(CPP) $(CFLAGS) -c ppu.cpp
-
-m6502.o: m6502.cpp
-	$(CPP) $(CFLAGS) -c m6502.cpp
-
-main.o: main.cpp main.h ppu.h
-	$(CPP) $(CFLAGS) -c main.cpp
-
-
-test.run: m6502.o main.o ppu.o
-	$(CPP) $(CFLAGS) $^ -o test.run
+%.o: %.cpp
+	$(CPP) $(CFLAGS) -c $<
 
 clean:
-	rm -f *.o *~ test.run
+	rm -f *.o *~ test
