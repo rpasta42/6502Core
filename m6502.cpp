@@ -918,6 +918,70 @@ void m6502::tick()
             }
             break;
         }
+        case 0x19:
+        {
+            switch(cycle)
+            {
+            case 0:
+            {
+                cycle++;
+                cycletype = CycleType::Read;
+                break;
+            }
+            case 1:
+            {
+                tmp3 = rb(pc);
+                pc++;
+                cycle++;
+                cycletype = CycleType::Read;
+                break;
+            }
+            case 2:
+            {
+                tmp3 |= (rb(pc)<<8);
+                tmp4 = tmp3 + y;
+                tmp3 = (tmp3 & 0xFF00) | ((tmp3 + y) & 0xFF);
+                pc++;
+                cycle++;
+                cycletype = CycleType::Read;
+                break;
+            }
+            case 3:
+            {
+                tmp1 = rb(tmp3);
+                if(tmp3 != tmp4)
+                {
+                    cycle++;
+                    cycletype = CycleType::Read;
+                }
+                else
+                {
+                    a |= tmp1;
+                    if(!a) flags |= 0x02;
+                    else flags &= 0xFD;
+                    if(a & 0x80) flags |= 0x80;
+                    else flags &= 0x7F;
+                    cycle=0;
+                    execing=false;
+                    cycletype = CycleType::Read;
+                }
+                break;
+            }
+            case 4:
+            {
+                a |= rb(tmp4);
+                if(!a) flags |= 0x02;
+                else flags &= 0xFD;
+                if(a & 0x80) flags |= 0x80;
+                else flags &= 0x7F;
+                cycle=0;
+                execing=false;
+                cycletype = CycleType::Read;
+                break;
+            }
+            }
+            break;
+        }
         case 0x20:
         {
             switch(cycle)
@@ -3683,13 +3747,6 @@ void m6502::tick()
             }
             break;
         }
-        /*case 0x19: {
-          string s;
-          cout << "got opcode 19";
-          cin >> s;
-
-          break;
-        }*/
         default:
         {
             printf("Unimplemented opcode %02x!\n",op);
