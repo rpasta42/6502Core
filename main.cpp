@@ -14,8 +14,10 @@ int main(int ac, char** av) {
    memset(mem, 0, MEMORY_SIZE);
 
    //0x8000
-
-   if(ac<2) return -1;
+   if (ac < 2) {
+      printf("usage: %s rom-path\n", av[0]);
+      return -1;
+   }
 
    string prog_path = av[1];
    int load_stat = load_nes(prog_path, mem);
@@ -186,7 +188,7 @@ void check_mem(u16 addr, u8 val, bool is_write) {
       if (PAUSE_PPU_RAM_ACCESS)
          print_end = true;
    }
-   if (addr >= 0x4000 && addr <= 0x400f) {
+   if (addr >= 0x4000 && addr <= 0x4017) { //0x400f
       if (PRINT_SOUND_ACCESS)
          printf("!!!!! sound\n");
       if (PAUSE_SOUND_ACCESS)

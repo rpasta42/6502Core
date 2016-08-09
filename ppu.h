@@ -14,7 +14,7 @@ struct ppu_t {
       //if (addr == 0x2002) return 255;
 
       return 255;
-
+      //return 0;
       return regs[addr - 0x2000];
    }
 

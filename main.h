@@ -7,10 +7,10 @@
 
 #define tabs "   "
 #define MEMORY_SIZE 0x10000 //(64*1000)
-#define MAX_CYCLES 1000000//10000//1000//100 //90000 //1000000
+#define MAX_CYCLES 10000000 //10000//1000 //100 //1000000
 #define EXTRACT_BIT(n, i) ((n & (1 << i)) >> i)
 //number of ticks to dump memory, registers and flags
-#define FREQ_DUMP 50
+#define FREQ_DUMP 100
 
 
 //CHECK_MEM STUFF

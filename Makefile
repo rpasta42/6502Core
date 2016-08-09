@@ -5,7 +5,7 @@ OBJ=m6502.o main.o ppu.o
 
 all: test
 
-test: $(OBJ)
+test: $(OBJ) *.h
 	$(CPP) $(CFLAGS) $(OBJ) -o test
 
 %.o: %.cpp

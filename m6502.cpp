@@ -3747,6 +3747,11 @@ void m6502::tick()
             }
             break;
         }
+        case 0x1a: { //TODO: fixme
+            cycle = 0;
+            pc++;
+            break;
+        }
         default:
         {
             printf("Unimplemented opcode %02x!\n",op);
