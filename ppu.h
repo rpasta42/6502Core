@@ -4,7 +4,7 @@
 #include "common.h"
 
 struct ppu_t {
-   u8 regs[9];
+   u8 regs[8];
 
    u8 rb(u16 addr) {
 
@@ -13,14 +13,18 @@ struct ppu_t {
 
       //if (addr == 0x2002) return 255;
 
-      return 255;
-      //return 0;
-      return regs[addr - 0x2000];
+      addr &= 0x7;
+
+      return regs[addr];
    }
 
    void wb(u16 addr, u8 val) {
       printf("******ppu wb (at %x): %i\n", addr, val);
       string s; cin >> s;
+      
+      addr &= 0x7;
+      
+      regs[addr] = val;
    }
 
 };

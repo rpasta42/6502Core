@@ -168,7 +168,7 @@ void check_mem(u16 addr, u8 val, bool is_write) {
       if (PAUSE_PRG_RAM_ACCESS)
          print_end = true;
    }
-   if (addr >= 0x8000 && addr <= 0xbfff) {
+   /*if (addr >= 0x8000 && addr <= 0xbfff) {
       if (PRINT_ROM_ACCESS_START)
          cout << "!!!!!!!!!!!!!! first 16KB ROM";
       if (PAUSE_ROM_ACCESS_START)
@@ -179,6 +179,9 @@ void check_mem(u16 addr, u8 val, bool is_write) {
          cout << "!!!!!!!!!! last 16kb of ROM" << endl;
       if (PAUSE_ROM_ACCESS_END)
          print_end = true;
+   }*/
+   if (addr >= 0x8000) {
+      print_end = true;
    }
    if (addr >= 0x2000 && addr <= 0x3fff) {
       if (PRINT_PPU_RAM_ACCESS) {
@@ -204,7 +207,7 @@ void check_mem(u16 addr, u8 val, bool is_write) {
 u16 translate_addr(u16 addr) {
    //return addr;
 
-   //uncomment if rpg rom size == 2
+   //uncomment if prg rom size == 2
    //if (addr >= 0xc000 && addr <= 0xffff) return addr - 0xc000 + 0x8000;
    uint ram_size = 0x800 - 0x0;
    if (addr >= 0x800 && addr <= (0x800 + ram_size)) {
