@@ -6,9 +6,14 @@
 #include "main.h"
 #include "ppu.h"
 
+ppu_t* ppu = nullptr;
+
 int main(int ac, char** av) {
    m6502* m = new m6502;
    m->init(false);
+   
+   ppu = new ppu_t;
+   ppu->init();
 
    u8* mem = new u8[MEMORY_SIZE];
    memset(mem, 0, MEMORY_SIZE);
@@ -33,6 +38,10 @@ int main(int ac, char** av) {
       if (m->reset && i > 7) break;
 
       m->tick();
+      for(int j = 0; j <= 3; j++)
+      {
+            ppu->tick();
+      }
       if (i % FREQ_DUMP == 0) {
          print_machine(m);
          print_mem(mem);
@@ -223,7 +232,6 @@ u16 translate_addr(u16 addr) {
 }
 
 void init_machine_mem(m6502* m, u8* mem) {
-   ppu_t* ppu = new ppu_t;
 
    auto rb = [mem, ppu](u16 addr) -> u8 {
       cout << "rb (" << (int)mem[addr]

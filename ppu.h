@@ -5,6 +5,33 @@
 
 struct ppu_t {
    u8 regs[8];
+   
+   int cpucycles;
+   int ppucycles;
+   
+   enum
+   {
+      PPU_POWERUP,
+      PPU_RESET,
+      PPU_NORMAL
+   } ppustate;
+
+   void init()
+   {
+       regs[0] = 0;
+       regs[1] = 0;
+       regs[2] = 0xa0; //1010 0000
+       regs[3] = 0;
+       //$2004 OAMDATA is random at reset, apparently.
+       regs[5] = 0;
+       regs[6] = 0;
+       regs[7] = 0;
+       
+       cpucycles = 0;
+       ppucycles = 0;
+       
+       ppustate = PPU_POWERUP;
+   }
 
    u8 rb(u16 addr) {
 
@@ -26,6 +53,8 @@ struct ppu_t {
       
       regs[addr] = val;
    }
+   
+   void tick();
 
 };
 
