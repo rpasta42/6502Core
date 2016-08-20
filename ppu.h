@@ -3,18 +3,20 @@
 
 #include "common.h"
 
+enum ppustate_t
+{
+   PPU_POWERUP,
+   PPU_RESET,
+   PPU_NORMAL
+};
+
 struct ppu_t {
    u8 regs[8];
    
    int cpucycles;
    int ppucycles;
    
-   enum
-   {
-      PPU_POWERUP,
-      PPU_RESET,
-      PPU_NORMAL
-   } ppustate;
+   ppustate_t ppustate;
 
    void init()
    {

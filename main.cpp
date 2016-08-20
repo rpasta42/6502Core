@@ -4,6 +4,7 @@
 
 #include "m6502.h"
 #include "main.h"
+#include "mapper.h"
 #include "ppu.h"
 
 ppu_t* ppu = nullptr;
@@ -15,7 +16,7 @@ int main(int ac, char** av) {
    ppu = new ppu_t;
    ppu->init();
 
-   u8* mem = new u8[MEMORY_SIZE];
+   mem = new u8[MEMORY_SIZE];
    memset(mem, 0, MEMORY_SIZE);
 
    //0x8000
@@ -78,12 +79,6 @@ int load_nes(string path, u8* mem, u8 address) {
    if (p[n++] != 'N' || p[n++] != 'E' || p[n++] != 'S' || p[n++] != 0x1a)
       return 1;
 
-   n = 10;
-   while (n <= 15) {
-      if (p[n++] != 0)
-         return 2;
-   }
-
    n = 0;
    nes_header_t* nes_header = (nes_header_t*)prog_code;
    n += sizeof(nes_header_t);
@@ -125,27 +120,11 @@ int load_nes(string path, u8* mem, u8 address) {
    uint prg_rom_size = 16384 * prg_rom_size_num;
    if (prg_rom_size == 0)
       prg_rom_size = 8192;
-   u8* prg_rom = new u8[prg_rom_size];
-   memcpy(prg_rom, prog_code + n, prg_rom_size);
-   //This function will be implemented eventually to handle mapper-specific ROM banking and mirroring.
-   //mapper_init(mapper, submapper, mem, p, prg_rom_size);
-   memcpy(mem + 0x8000, prog_code + n, prg_rom_size);
-   //p += prg_rom_size;
-   n += prg_rom_size;
-
-   uint chr_rom_size = 8192 * nes_header->chr_rom_size;
-   u8* chr_rom = new u8[chr_rom_size];
-   memcpy(chr_rom, prog_code + n, chr_rom_size);
-   n += chr_rom_size;
+   uint chr_rom_size = 8192 * chr_rom_size_num;
+   mapper_init(mapper, submapper, prog_code + n, prg_rom_size, chr_rom_size);
 
    if (nes_header->flags7.play_choice10)
       return 4; //TODO: read INST-ROM and PROM
-
-   char* title_c_str = new char[128];
-   memcpy(title_c_str, prog_code + (length - 1 - 127), 127);
-   title_c_str[127] = '\0';
-
-   string title = string(title_c_str);
 
    cout << "size of nes_header_t (should be 16): "
       << sizeof(nes_header_t) << endl;
@@ -153,9 +132,7 @@ int load_nes(string path, u8* mem, u8 address) {
    cout << "PRG rom size: "
       << (int)nes_header->prg_rom_size << endl
       << "CHR rom size: " << (int)nes_header->chr_rom_size << endl;
-      //<< "title: " << endl << title << endl;
 
-   //return 7;
    return 0;
 }
 
@@ -189,15 +166,12 @@ void check_mem(u16 addr, u8 val, bool is_write) {
       if (PAUSE_ROM_ACCESS_END)
          print_end = true;
    }*/
-   if (addr >= 0x8000) {
-      print_end = true;
-   }
    if (addr >= 0x2000 && addr <= 0x3fff) {
       if (PRINT_PPU_RAM_ACCESS) {
          printf("!!!!!!!!! gpu register %s: (addr: %i) (addr hex: %x) (val: %i)",
                 action, addr, addr, val);
       }
-      if (PAUSE_PPU_RAM_ACCESS)
+      if (PAUSE_PPU_RAM_ACCESS && ppu->ppustate == PPU_NORMAL)
          print_end = true;
    }
    if (addr >= 0x4000 && addr <= 0x4017) { //0x400f
@@ -240,7 +214,8 @@ void init_machine_mem(m6502* m, u8* mem) {
 
       if (addr >= 0x2000 && addr <= 0x3fff)
          return ppu->rb(addr);
-      return mem[translate_addr(addr)];
+      else
+         return mem[translate_addr(addr)];
    };
    auto wb = [mem, ppu](u16 addr, u8 val) {
       cout << "wb (" << (int)val << ") at "
@@ -248,7 +223,7 @@ void init_machine_mem(m6502* m, u8* mem) {
       check_mem(addr, val, true);
       if (addr >= 0x2000 && addr <= 0x3fff)
          ppu->wb(addr, val);
-      else
+      else if(addr < 0x8000) //Make sure we can't write to ROM
          mem[translate_addr(addr)] = val;
    };
    m->rb = rb;
