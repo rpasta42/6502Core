@@ -176,7 +176,7 @@ void check_mem(u16 addr, u8 val, bool is_write) {
    }
    if (addr >= 0x4000 && addr <= 0x4017) { //0x400f
       if (PRINT_SOUND_ACCESS)
-         printf("!!!!! sound\n");
+         printf("!!!!! sound and/or input\n");
       if (PAUSE_SOUND_ACCESS)
          print_end = true;
    }
