@@ -15,6 +15,12 @@ struct mapper_t
 
     u8* chr_ram_nbb; //non-battery-backed
     u8* chr_ram_bb;
+
+    unsigned prg_rom_size;
+    unsigned chr_rom_size;
+
+    function<u8(u16)> prg_rb;
+    function<void(u16,u8)> prg_wb;
 };
 
 extern mapper_t globmapper;

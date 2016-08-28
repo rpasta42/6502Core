@@ -143,7 +143,7 @@ void print_mem(u8* mem, uint start, uint end) {
 }
 
 void check_mem(u16 addr, u8 val, bool is_write) {
-   //used for looking at how the rpg ram and rom being used
+   //used for looking at how the prg ram and rom being used
    //and stepping through every one of them
 
    const char* action = is_write ? "write" : "read";
@@ -187,24 +187,6 @@ void check_mem(u16 addr, u8 val, bool is_write) {
 
 }
 
-u16 translate_addr(u16 addr) {
-   //return addr;
-
-   //uncomment if prg rom size == 2
-   //if (addr >= 0xc000 && addr <= 0xffff) return addr - 0xc000 + 0x8000;
-   uint ram_size = 0x800 - 0x0;
-   if (addr >= 0x800 && addr <= (0x800 + ram_size)) {
-      return addr - ram_size;
-   }
-   if (addr >= 0x1000 && addr <= (0x1000 + ram_size)) {
-      return addr - 0x1000;
-   }
-   if (addr >= 0x1800 && addr <= (0x1800 + ram_size)) {
-      return addr - 0x1800;
-   }
-   return addr;
-}
-
 void init_machine_mem(m6502* m, u8* mem) {
 
    auto rb = [mem, ppu](u16 addr) -> u8 {
@@ -212,19 +194,23 @@ void init_machine_mem(m6502* m, u8* mem) {
            << ") at " << std::hex << addr << endl;
       check_mem(addr, mem[addr], false);
 
-      if (addr >= 0x2000 && addr <= 0x3fff)
+      if(addr < 0x2000)
+         return mem[addr & 0x7ff];
+      else if (addr >= 0x2000 && addr <= 0x3fff)
          return ppu->rb(addr);
-      else
-         return mem[translate_addr(addr)];
+      else if(addr >= 0x5000)
+         return globmapper.prg_rb(addr);
    };
    auto wb = [mem, ppu](u16 addr, u8 val) {
       cout << "wb (" << (int)val << ") at "
            << std::hex << addr << endl;
       check_mem(addr, val, true);
-      if (addr >= 0x2000 && addr <= 0x3fff)
+      if(addr < 0x2000)
+         mem[addr & 0x7ff] = val;
+      else if (addr >= 0x2000 && addr <= 0x3fff)
          ppu->wb(addr, val);
-      else if(addr < 0x8000) //Make sure we can't write to ROM
-         mem[translate_addr(addr)] = val;
+      else if(addr >= 0x5000)
+         globmapper.prg_wb(addr,val);
    };
    m->rb = rb;
    m->wb = wb;
@@ -233,11 +219,7 @@ void init_machine_mem(m6502* m, u8* mem) {
 void print_regs(m6502* m) {
    cout << "registers:" << endl;
 
-   cout << tabs << "a: " << m->a <<
-           tabs << "x: " << m->x <<
-           tabs << "y: " << m->y <<
-           tabs << "s: " << m->s << endl <<
-           tabs << "pc: " << m->pc << endl;
+   printf("\ta: %02x\tx: %02x\ty: %02x\ts: %02x\n\tpc: %04x\n", m->a, m->x, m->y, m->s, m->pc);
 }
 
 string or_flags_to_str(uint n, uint len) {
