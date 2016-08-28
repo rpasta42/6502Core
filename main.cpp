@@ -99,7 +99,7 @@ int load_nes(string path, u8* mem, u8 address) {
       << "flags7 combined: "
       << or_flags_to_str(nes_header->flags7_b, 8) << endl;
 
-   u16 mapper = upper | (lower << 4);
+   u16 mapper = lower | (upper << 4);
    u8 submapper = 0;
 
    u16 prg_rom_size_num = nes_header->prg_rom_size;

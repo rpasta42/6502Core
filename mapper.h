@@ -21,6 +21,9 @@ struct mapper_t
 
     function<u8(u16)> prg_rb;
     function<void(u16,u8)> prg_wb;
+
+    //UxROM
+    u8 prg_rom_bank_uxrom;
 };
 
 extern mapper_t globmapper;
